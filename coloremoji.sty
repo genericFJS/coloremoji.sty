@@ -1,82 +1,133 @@
-\ProvidesPackage{coloremoji}
+% Sources:
+% https://tex.stackexchange.com/a/99176 - \ifvalidimage{}
+% https://tex.stackexchange.com/a/194961/13600 - \coloremoji (idea)
+% https://tex.stackexchange.com/a/295217/136226 - \coloremoji_flag (idea)
+\RequirePackage{expl3}
+\ProvidesExplPackage{coloremoji}{2017-10-14}{0.2}{Insert emojis in Xe-/Lua-/LaTeX}
 
-\usepackage{graphicx,stringenc}
-\usepackage{xparse,expl3}
-\usepackage[utf8]{inputenc}
-\usepackage[export]{adjustbox}
-\usepackage{amsmath}
-\usepackage{newunicodechar}
+\RequirePackage{graphicx}
+\RequirePackage{stringenc}
+\RequirePackage{xparse}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[export]{adjustbox}
+\RequirePackage{amsmath}
+\RequirePackage{newunicodechar}
 
+\newif\ifgraphicexist
+\newcommand\ifvalidimage[1]{%
+	\begingroup
+		\global\graphicexisttrue
+		\let\input@path\Ginput@path
+		\filename@parse{#1}%
+		\ifx\filename@ext\relax
+			\@for\Gin@temp:=\Gin@extensions\do{%
+				\ifx\Gin@ext\relax
+					\Gin@getbase\Gin@temp
+				\fi
+			}%
+		\else
+			\Gin@getbase{\Gin@sepdefault\filename@ext}%
+			\ifx\Gin@ext\relax
+				\global\graphicexistfalse
+				\def\Gin@base{\filename@area\filename@base}%
+				\edef\Gin@ext{\Gin@sepdefault\filename@ext}%
+			\fi
+		\fi
+		\ifx\Gin@ext\relax
+			\global\graphicexistfalse
+		\else
+			\@ifundefined{Gin@rule@\Gin@ext}%
+			{\global\graphicexistfalse}%
+			{}%
+		\fi
+		\ifx\Gin@ext\relax
+			\gdef\imageextension{unknown}%
+		\else
+			\xdef\imageextension{\Gin@ext}%
+		\fi
+	\endgroup
+	\ifgraphicexist
+		\expandafter \@firstoftwo
+	\else
+		\expandafter \@secondoftwo
+	\fi
+}
 
-\ExplSyntaxOn
-% http://tex.stackexchange.com/a/194961/13600
 \tl_const:Nn \c_coloremoji_dir_tl { emoji_images }
 \tl_new:N \l_coloremoji_input_tl
 
-\cs_new_protected:Npn \coloremoji_unicode:n #1
- {
-  \text{%
-  \includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}.pdf}%
-  }%
- }
+\cs_new_protected:Npn \coloremoji_unicode:n #1 {
+	\ifvalidimage{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}.pdf}{
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}.pdf}}
+	}{
+		\ClassWarning{coloremoji}{Emoji~image~not~found:~'\l_coloremoji_input_tl'. Inserting '!' instead}
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / 2757.pdf}}
+	}
+}
 
-\cs_new_protected:Npn \coloremoji_eightbit:n #1
- {
-  \StringEncodingConvert \l_coloremoji_input_tl
-    { \tl_to_str:n { #1 } } { utf8 } { utf32 }
+\cs_new_protected:Npn \coloremoji_eightbit:n #1 {
+  \StringEncodingConvert \l_coloremoji_input_tl { \tl_to_str:n { #1 } } { utf8 } { utf32 }
   \tl_set:Nx \l_coloremoji_input_tl { \pdfescapehex\expandafter{\l_coloremoji_input_tl} }
   \regex_replace_once:nnN { \A 0* } { } \l_coloremoji_input_tl
-  \text{%
-  \includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_input_tl.pdf}%
-  }%
- }
+  \ifvalidimage{\c_coloremoji_dir_tl / \l_coloremoji_input_tl.pdf}{
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_input_tl.pdf}}
+	}{
+		\ClassWarning{coloremoji}{Emoji~image~not~found:~'\l_coloremoji_input_tl'. Inserting '!' instead}
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / 2757.pdf}}
+	}
+}
 
-\bool_if:nTF { \sys_if_engine_xetex_p: || \sys_if_engine_luatex_p: }
-  {
-   \cs_set_eq:NN \coloremoji \coloremoji_unicode:n
-  }
-  {
-   \cs_set_eq:NN \coloremoji \coloremoji_eightbit:n
-  }
-  
-% https://tex.stackexchange.com/a/295217/136226
-\bool_if:nTF { \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p: }
- {
-  \cs_new:Nn \coloremoji_flag:n
-   {
-    \coloremoji_flag_unicode:nn { #1 }
-   }
- }
- {
-  \cs_new:Nn \coloremoji_flag:n
-   {
-    \peek_charcode:NTF ^^f0
-     {
-      \coloremoji_flag_eightbit:nnnnn { #1 }
-     }
-     {
-      {\coloremoji{#1}}
-     }
-   }
- }
+\bool_if:nTF { \sys_if_engine_xetex_p: || \sys_if_engine_luatex_p: }{
+	\cs_set_eq:NN \coloremoji \coloremoji_unicode:n
+}{
+	\cs_set_eq:NN \coloremoji \coloremoji_eightbit:n
+}
 
-% missing checks for luatex/xetex :-(
-\cs_new_protected:Nn \coloremoji_flag_unicode:nn
- {
-  \includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}.pdf}
- }
+\bool_if:nTF { \sys_if_engine_luatex_p: || \sys_if_engine_xetex_p: }{
+	\cs_new:Nn \coloremoji_flag:n {	\coloremoji_flag_unicode:nn { #1 } }
+}{
+	\cs_new:Nn \coloremoji_flag:n {
+		\peek_charcode:NTF ^^f0 {
+		  \coloremoji_flag_eightbit:nnnnn { #1 }
+		}{
+			{ \coloremoji{#1} }
+		}
+	}
+}
 
-\cs_new_protected:Nn \coloremoji_flag_eightbit:nnnnn
- {
-  \StringEncodingConvert \l_coloremoji_inputA_tl { \tl_to_str:n { #1 } } { utf8 } { utf32 }
-  \tl_set:Nx \l_coloremoji_inputA_tl { \pdfescapehex\expandafter{\l_coloremoji_inputA_tl} }
-  \regex_replace_once:nnN { \A 0* } { } \l_coloremoji_inputA_tl
-  \StringEncodingConvert \l_coloremoji_inputB_tl { \tl_to_str:n { #2#3#4#5 } } { utf8 } { utf32 }
-  \tl_set:Nx \l_coloremoji_inputB_tl { \pdfescapehex\expandafter{\l_coloremoji_inputB_tl} }
-  \regex_replace_once:nnN { \A 0* } { } \l_coloremoji_inputB_tl
-  \includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_inputA_tl-\l_coloremoji_inputB_tl.pdf}
- }
+% single country code symbol not working with luatex/xetex in some cases :-(
+\cs_new_protected:Nn \coloremoji_flag_unicode:nn {
+	\ifvalidimage{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}.pdf}{
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}.pdf}}
+	}{
+		\ClassWarning{coloremoji}{Emoji~image(flag)~not~found:~'\int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}'.~Inserting~country~code.}
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}.pdf}
+			\ifvalidimage{\c_coloremoji_dir_tl / \int_to_Hex:n{`#2}.pdf}{
+				\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \int_to_Hex:n{`#2}.pdf}
+			}{
+				#2
+			}
+		}
+	}
+}
 
-\ExplSyntaxOff
+\cs_new_protected:Nn \coloremoji_flag_eightbit:nnnnn {
+	\StringEncodingConvert \l_coloremoji_inputA_tl { \tl_to_str:n { #1 } } { utf8 } { utf32 }
+	\tl_set:Nx \l_coloremoji_inputA_tl { \pdfescapehex\expandafter{\l_coloremoji_inputA_tl} }
+	\regex_replace_once:nnN { \A 0* } { } \l_coloremoji_inputA_tl
+	\StringEncodingConvert \l_coloremoji_inputB_tl { \tl_to_str:n { #2#3#4#5 } } { utf8 } { utf32 }
+	\tl_set:Nx \l_coloremoji_inputB_tl { \pdfescapehex\expandafter{\l_coloremoji_inputB_tl} }
+	\regex_replace_once:nnN { \A 0* } { } \l_coloremoji_inputB_tl
+
+	\ifvalidimage{\c_coloremoji_dir_tl / \l_coloremoji_inputA_tl-\l_coloremoji_inputB_tl.pdf}{
+		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_inputA_tl-\l_coloremoji_inputB_tl.pdf}}
+	}{
+		\ClassWarning{coloremoji}{Emoji~image(flag)~not~found:~'\l_coloremoji_inputA_tl - \l_coloremoji_inputB_tl '. ~Inserting~country~code.}
+		\text{
+			\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_inputA_tl.pdf}
+			\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \l_coloremoji_inputB_tl.pdf}
+		}
+	}
+}
 
 \input{coloremoji_characters.sty}
