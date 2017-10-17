@@ -1,5 +1,9 @@
-syntax: glob
-*~
-ls-R
-test*
+# emoji sources:
+emojitwo
+twemoji
+# binarys:
+*.pdf
+# LaTeX files:
+*.aux
 *.log
+*.synctex.gz
