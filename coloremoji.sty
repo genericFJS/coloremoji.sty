@@ -1,13 +1,12 @@
 % Sources/Inspiration:
 % https://tex.stackexchange.com/a/99176 (\ifvalidimage{})
 % https://tex.stackexchange.com/a/194961/13600 (\coloremoji)
-% https://tex.stackexchange.com/a/295217/136226 (\coloremoji_flag)
-\RequirePackage{expl3}
+% https://tex.stackexchange.com/a/295217/136226 (\coloremoji_composite)
+\RequirePackage{xparse}	% includes expl3
 \ProvidesExplPackage{coloremoji}{2017-10-14}{0.2}{Insert emojis in Xe-/Lua-/LaTeX}
 
 \RequirePackage{graphicx}
 \RequirePackage{stringenc}
-\RequirePackage{xparse}
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[export]{adjustbox}
 \RequirePackage{amsmath}
@@ -60,6 +59,7 @@
 \newcommand{\printemoji}[1]{
 	\ifvalidimage{\c_coloremoji_dir_tl / \tl_trim_spaces:n{#1} .pdf}{
 		\text{\includegraphics[width=1em,valign=t,raise=-0.1em]{\c_coloremoji_dir_tl / \tl_trim_spaces:n{#1}.pdf}}
+		%\text{\includegraphics[width=1em,raise=-0.21em]{\c_coloremoji_dir_tl / \tl_trim_spaces:n{#1}.pdf}}
 	}{
 		\ClassWarning{coloremoji}{Emoji~image~not~found:~'\c_coloremoji_dir_tl / \tl_trim_spaces:n{#1}'.~Inserting~placeholder.}
 		\textbullet
@@ -82,22 +82,22 @@
 	\printemoji{\l_coloremoji_input_tl}
 }
 
-% expl3-macro(s) to process flag-emojis:
+% expl3-macro(s) to process composite-emojis:
 % --------------------------------------
 
 % Unicode (Xe-, LuaLaTeX): If the two characters form a new emoji, insert this emoji. Else insert the first emoji and let the rest be processed.
-\cs_new_protected:Nn \coloremoji_flag_unicode:nn {
+\cs_new_protected:Nn \coloremoji_composite_unicode:nn {
 	\ifvalidimage{\c_coloremoji_dir_tl / \int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}.pdf}{
 		\printemoji{\int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}}
 	}{
-		\ClassWarning{coloremoji}{Composite~emoji~not~found:~'\int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}'.}
+		%\ClassWarning{coloremoji}{Composite~emoji~not~found:~'\int_to_Hex:n{`#1}-\int_to_Hex:n{`#2}'.}
 		\printemoji{\int_to_Hex:n{`#1}}
 		#2
 	}
 }
 
 % Other (PDFLaTeX): Process characters to hex form. If the two characters form a new emoji, insert this emoji. Else insert the first emoji and let the rest be processed.
-\cs_new_protected:Nn \coloremoji_flag_eightbit:nnnnn {
+\cs_new_protected:Nn \coloremoji_composite_eightbit:nnnnn {
 	\StringEncodingConvert \l_coloremoji_inputA_tl { \tl_to_str:n { #1 } } { utf8 } { utf32 }
 	\tl_set:Nx \l_coloremoji_inputA_tl { \pdfescapehex\expandafter{\l_coloremoji_inputA_tl} }
 	\regex_replace_once:nnN { \A 0* } { } \l_coloremoji_inputA_tl
@@ -108,7 +108,7 @@
 	\ifvalidimage{\c_coloremoji_dir_tl / \l_coloremoji_inputA_tl-\l_coloremoji_inputB_tl.pdf}{
 		\printemoji{\l_coloremoji_inputA_tl-\l_coloremoji_inputB_tl}
 	}{
-		\ClassWarning{coloremoji}{Composite~emoji~not~found:~' \l_coloremoji_inputA_tl - \l_coloremoji_inputB_tl '.}
+		%\ClassWarning{coloremoji}{Composite~emoji~not~found:~' \l_coloremoji_inputA_tl - \l_coloremoji_inputB_tl '.}
 		\printemoji{\l_coloremoji_inputA_tl}
 		#2#3#4#5
 	}
@@ -119,45 +119,38 @@
 	% Single emoji:
 	\cs_set_eq:NN \coloremoji \coloremoji_unicode:n
 	% Composite emoji:
-	\cs_new:Nn \coloremoji_flag:n {
-			% If following character is a space, print single emoji.
-			\peek_charcode:NTF \c_space_token {
+	\cs_new:Nn \coloremoji_composite:n {
+		% If following character is a space, print single emoji.
+		\peek_charcode:NTF \c_space_token {
+			\printemoji{\int_to_Hex:n{`#1}}
+		}{
+			% If following character is an other token (commands, ...), print single emoji. Else insert the composite emoji.
+			\peek_charcode:NTF \c_other_token {
 				\printemoji{\int_to_Hex:n{`#1}}
 			}{
-				% If following character is an other token (commands, ...), print single emoji. Else insert the composite emoji.
-				\peek_charcode:NTF \c_other_token {
-					\printemoji{\int_to_Hex:n{`#1}}
-				}{
-					\coloremoji_flag_unicode:nn { #1 }
-				}
+				\coloremoji_composite_unicode:nn { #1 }
 			}
 		}
-	\cs_new:Nn \coloremoji_skin:n { 
-		\coloremoji_skin_unicode:nn { #1 } 
 	}
 }{
 	% If following character is a space: print single emoji.
 	\cs_set_eq:NN \coloremoji \coloremoji_eightbit:n
 	% If following character matches charcode, print single emoji. Else insert the composite emoji.
-	\cs_new:Nn \coloremoji_flag:n {
-			\peek_charcode:NTF ^^f0 {
-			  \coloremoji_flag_eightbit:nnnnn { #1 }
-			}{
-				{ \coloremoji{#1} }
-			}
+	\cs_new:Nn \coloremoji_composite:n {
+		\peek_charcode:NTF ^^f0 {
+		  \coloremoji_composite_eightbit:nnnnn { #1 }
+		}{
+			{ \coloremoji{#1} }
 		}
-	\cs_new:Nn 
-		\coloremoji_skin:n {
-			\peek_charcode:NTF ^^f0 {
-			  \coloremoji_skin_eightbit:nnnnn { #1 }
-			}{
-				{ \coloremoji{#1} }
-			}
-		}
+	}
 }
 
-% command to input emoji by hex-value:
-\newcommand{\emoji}[1]{\printemoji{#1}}
+\input{coloremoji_shortnames.sty}
+\newcommand{\emoji}[1]{
+	\coloremoji_shortnames{#1}
+}
+
+% \NewDocumentCommand{
 
 % emoji-character (command-)list:
 \input{coloremoji_characters.sty}
