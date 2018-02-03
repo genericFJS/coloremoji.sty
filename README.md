@@ -4,10 +4,10 @@ Style package for directly including color emojis in latex documents
 
 Installation
 
-    mkdir -p ~/Library/texmf/tex/latex/local
-    cd ~/Library/texmf/tex/latex/local
-    git clone --recursive git@github.com:alecjacobson/coloremoji.sty.git
-    texhash coloremoji.sty
+    TEXMFHOME=`kpsewhich -var TEXMFHOME`
+    mkdir -p ${TEXMFHOME}/tex/latex/local
+    cd ${TEXMFHOME}/tex/latex/local
+    git clone https://github.com/genericFJS/coloremoji.sty.git
 
 [Related blog entry](http://www.alecjacobson.com/weblog/?p=4018)
 
