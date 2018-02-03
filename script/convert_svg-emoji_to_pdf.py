@@ -15,7 +15,7 @@ else:
 if emojiPath == '1' or emojiPath == '[1]':
 	emojiPath = '../emojitwo/svg'
 elif emojiPath == '2' or emojiPath == '[2]':
-	emojiPath = '../emojitwo/svg'
+	emojiPath = '../twemoji/svg'
 # check if valid diretory:
 if not (os.path.isdir(emojiPath)):
 	print 'Directory "'+emojiPath+'" does not exist. It has to be relative to the location of this script. I.e. "../emojies/svg" for the folder "emojies" in the repository root folder.'
