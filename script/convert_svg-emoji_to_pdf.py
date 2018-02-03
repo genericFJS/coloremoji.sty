@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
 	emojiPath = sys.argv[1]
 else:
 	print("Enter [1] for emojitwo, [2] for twemoji or a path to another svg emoji source:")
-	emojiPath = str(raw_input())
+	emojiPath = str(input())
 if emojiPath == '1' or emojiPath == '[1]':
 	emojiPath = '../emojitwo/svg'
 elif emojiPath == '2' or emojiPath == '[2]':
