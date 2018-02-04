@@ -27,7 +27,7 @@ for filename in os.listdir(emojiPath):
 	processedCount += 1
 	if os.path.isfile(emojiPath+'/'+filename) and filename.endswith('.svg'):
 		hasSVG = True
-		cairosvg.svg2pdf(url=emojiPath+'/'+filename, write_to='../emoji_images/'+filename.split('.svg')[0]+'.pdf')
+		cairosvg.svg2pdf(url=emojiPath+'/'+filename, write_to='../emoji_images/'+filename.upper().split('.SVG')[0]+'.pdf')
 		sys.stdout.write('Processing: '+str(processedCount)+'\r')
 # check if SVGs were processed:
 if not hasSVG:
