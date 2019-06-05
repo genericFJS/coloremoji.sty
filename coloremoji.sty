@@ -3,7 +3,7 @@
 % https://tex.stackexchange.com/a/194961/13600 (\coloremoji)
 % https://tex.stackexchange.com/a/295217/136226 (\coloremoji_composite)
 \RequirePackage{xparse}	% includes expl3
-\ProvidesExplPackage{coloremoji}{2017-10-14}{0.2}{Insert emojis in Xe-/Lua-/LaTeX}
+\ProvidesPackage{coloremoji}
 
 \RequirePackage{graphicx}
 \RequirePackage{stringenc}
@@ -52,6 +52,7 @@
 		\expandafter \@secondoftwo
 	\fi
 }
+\ExplSyntaxOn
 \tl_const:Nn \c_coloremoji_dir_tl { emoji_images }
 
 % Command to print an emoji:
