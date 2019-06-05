@@ -2,14 +2,27 @@ coloremoji.sty
 ==============
 Style package for directly including color emojis in latex documents
 
-Installation
+[Related blog entry](http://www.alecjacobson.com/weblog/?p=4018)
 
-    TEXMFHOME=`kpsewhich -var TEXMFHOME`
+## Installation
+
+    TEXMFHOME=`kpsewhich -var-value TEXMFHOME`
     mkdir -p ${TEXMFHOME}/tex/latex/local
     cd ${TEXMFHOME}/tex/latex/local
     git clone https://github.com/genericFJS/coloremoji.sty.git
 
-[Related blog entry](http://www.alecjacobson.com/weblog/?p=4018)
+You'll also need to generate emoji images. Grab one of
+[twemoji](https://github.com/twitter/twemoji) or
+[emojitwo](https://github.com/EmojiTwo/emojitwo); both contain SVG emojis. The
+`convert_svg-emoji_to_pdf.py` script in the `script/` directory can convert
+these to PDF format for use with this package; it takes a path as an argument.
+For instance using twemoji:
+    1. `git clone https://github.com/twitter/twemoji.git`
+    2. `python3 convert_svg-emoji_to_pdf.py ../twemoji/svg`
+
+The script requires `cairo` installed locally (this is available in `brew` and
+other package managers), as well as the `cairosvg` Python library, which can be
+installed via `pip`.
 
 ## Examples
 
