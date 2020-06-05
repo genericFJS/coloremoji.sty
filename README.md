@@ -12,8 +12,8 @@ Style package for directly including color emojis in latex documents
     git clone https://github.com/genericFJS/coloremoji.sty.git
 
 You'll also need to generate emoji images. Grab one of
-[twemoji](https://github.com/twitter/twemoji) or
-[emojitwo](https://github.com/EmojiTwo/emojitwo); both contain SVG emojis. The
+[twemoji](https://github.com/twitter/twemoji) ([CC-BY](https://github.com/twitter/twemoji#attribution-requirements)) or
+[emojitwo](https://github.com/EmojiTwo/emojitwo) ([CC-BY](https://github.com/EmojiTwo/emojitwo/blob/master/LICENSE.md)); both contain SVG emojis. The
 `convert_svg-emoji_to_pdf.py` script in the `script/` directory can convert
 these to PDF format for use with this package; it takes a path as an argument.
 For instance using twemoji:
@@ -23,6 +23,8 @@ For instance using twemoji:
 The script requires `cairo` installed locally (this is available in `brew` and
 other package managers), as well as the `cairosvg` Python library, which can be
 installed via `pip`.
+
+The `newunicodechar` Tex package is required.
 
 ## Examples
 
@@ -34,9 +36,9 @@ The following LaTeX code:
     Hello, 🌎.
     \end{document}
 
-produces something like:
+produces something like (using twemoji):
 
-![Hello, world.](http://alecjacobson.com/weblog/media/hello-world-emoji.png)
+![Hello, world.](docs/hello_world.png)
 
 You can even use emojis in math. The following LaTeX code:
 
@@ -46,14 +48,10 @@ You can even use emojis in math. The following LaTeX code:
 
 produces something like:
 
-![Emojis in math
-mode.](http://alecjacobson.com/weblog/media/alligator-power-integral-jack-o-lantern.png)
+![Emojis in math mode.](docs/math.png)
 
 ## Known issues
 
-This style sheet creates a PDF where each emoji is actually an embedded _image_
-rather than a character using the [Apple Color Emoji
-typeface](http://en.wikipedia.org/wiki/Apple_Color_Emoji). This means you won't
-be able to correctly copy and paste emjois from the resulting .pdf files.
+This style sheet creates a PDF where each emoji is actually an embedded vector _image_ rather than a character using the Emoji typeface. This means you won't be able to correctly copy and paste emjois from the resulting .pdf files.
 
 The encoding of the `.tex` must support emoji's, that is unicode characters. So switch your encoding to something like UTF-8.
