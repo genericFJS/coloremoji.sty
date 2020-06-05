@@ -24,6 +24,8 @@ The script requires `cairo` installed locally (this is available in `brew` and
 other package managers), as well as the `cairosvg` Python library, which can be
 installed via `pip`.
 
+The `newunicodechar` Tex package is required.
+
 ## Examples
 
 The following LaTeX code:
