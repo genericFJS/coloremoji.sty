@@ -34,9 +34,9 @@ The following LaTeX code:
     Hello, 🌎.
     \end{document}
 
-produces something like:
+produces something like (using twemoji):
 
-![Hello, world.](http://alecjacobson.com/weblog/media/hello-world-emoji.png)
+![Hello, world.](docs/hello_world.png)
 
 You can even use emojis in math. The following LaTeX code:
 
@@ -46,8 +46,7 @@ You can even use emojis in math. The following LaTeX code:
 
 produces something like:
 
-![Emojis in math
-mode.](http://alecjacobson.com/weblog/media/alligator-power-integral-jack-o-lantern.png)
+![Emojis in math mode.](docs/math.png)
 
 ## Known issues
 
