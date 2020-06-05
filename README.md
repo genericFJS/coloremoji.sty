@@ -12,8 +12,8 @@ Style package for directly including color emojis in latex documents
     git clone https://github.com/genericFJS/coloremoji.sty.git
 
 You'll also need to generate emoji images. Grab one of
-[twemoji](https://github.com/twitter/twemoji) or
-[emojitwo](https://github.com/EmojiTwo/emojitwo); both contain SVG emojis. The
+[twemoji](https://github.com/twitter/twemoji) ([CC-BY](https://github.com/twitter/twemoji#attribution-requirements)) or
+[emojitwo](https://github.com/EmojiTwo/emojitwo) ([CC-BY](https://github.com/EmojiTwo/emojitwo/blob/master/LICENSE.md)); both contain SVG emojis. The
 `convert_svg-emoji_to_pdf.py` script in the `script/` directory can convert
 these to PDF format for use with this package; it takes a path as an argument.
 For instance using twemoji:
